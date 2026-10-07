@@ -422,16 +422,48 @@ function speakCurrent() {
 
   const item = playlist[currentIndex];
 
-  nowPlaying.textContent =
-    `குறள் ${item.number}`;
+  nowPlaying.textContent = `குறள் ${item.number}`;
 
   renderPlaylist();
 
   playing = true;
 
-  playAllButton.textContent =
-    "⏸ Pause Playlist";
+  playAllButton.textContent = "⏸ Pause Playlist";
 
+  // For now, use the real audio file only for Kural 32.
+  if (item.number === 32) {
+
+    const audio = new Audio("kural-032.wav");
+
+    audio.onplay = () => {
+      statusElement.textContent = "🔊 Playing Kural 32...";
+    };
+
+    audio.onended = () => {
+      statusElement.textContent = "Finished";
+
+      if (playing) {
+        nextKural();
+
+        if (playing) {
+          setTimeout(() => {
+            speakCurrent();
+          }, 500);
+        }
+      }
+    };
+
+    audio.onerror = () => {
+      statusElement.textContent =
+        "Could not load kural-032.wav";
+    };
+
+    audio.play();
+
+    return;
+  }
+
+  // Other Kurals still use browser speech for now.
   const fullText =
     `குறள் ${item.number}. ${item.kural}. பொருள். ${item.meaning}`;
 
