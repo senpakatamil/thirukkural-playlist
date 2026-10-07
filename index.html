@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>திருக்குறள் ஆடியோ Playlist</title>
+
+  <style>
+    body {
+      font-family: Arial, "Noto Sans Tamil", sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+      color: #222;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 25px;
+    }
+
+    .player {
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .now-playing {
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 15px 0;
+    }
+
+    button {
+      border: none;
+      padding: 12px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      background: #333;
+      color: white;
+      font-size: 15px;
+    }
+
+    button:hover {
+      opacity: 0.85;
+    }
+
+    .play-all {
+      font-size: 17px;
+      padding: 14px 24px;
+    }
+
+    .settings {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 15px;
+    }
+
+    select {
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      max-width: 320px;
+    }
+
+    .kural {
+      background: white;
+      padding: 20px;
+      margin-bottom: 15px;
+      border-radius: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      cursor: pointer;
+    }
+
+    .kural.active {
+      outline: 3px solid #333;
+    }
+
+    .kural-number {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 12px;
+    }
+
+    .kural-text {
+      font-size: 21px;
+      line-height: 1.8;
+      margin-bottom: 15px;
+    }
+
+    .meaning-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .meaning {
+      line-height: 1.7;
+      color: #444;
+    }
+
+    .status {
+      text-align: center;
+      color: #666;
+      margin-top: 12px;
+      min-height: 24px;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+
+      .kural-text {
+        font-size: 18px;
+      }
+
+      button {
+        padding: 10px 13px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>🎧 திருக்குறள் ஆடியோ Playlist</h1>
+
+  <div class="subtitle">
+    Set 4
+  </div>
+
+  <div class="player">
+
+    <div class="now-playing" id="nowPlaying">
+      எதுவும் இயக்கப்படவில்லை
+    </div>
+
+    <div class="controls">
+
+      <button onclick="previousKural()">⏮ Previous</button>
+
+      <button
+        class="play-all"
+        onclick="togglePlayAll()"
+        id="playAllButton">
+        ▶️ Play All
+      </button>
+
+      <button onclick="toggleCurrent()">▶️ / ⏸ Play</button>
+
+      <button onclick="nextKural()">Next ⏭</button>
+
+      <button onclick="stopSpeech()">⏹ Stop</button>
+
+    </div>
+
+    <div class="settings">
+
+      <label>
+        குரல்:
+        <select id="voiceSelect"></select>
+      </label>
+
+      <label>
+        வேகம்:
+        <select id="speedSelect">
+          <option value="0.7">0.7x</option>
+          <option value="0.8">0.8x</option>
+          <option value="0.9">0.9x</option>
+          <option value="1" selected>1.0x</option>
+          <option value="1.1">1.1x</option>
+          <option value="1.2">1.2x</option>
+          <option value="1.4">1.4x</option>
+        </select>
+      </label>
+
+    </div>
+
+    <div class="status" id="status">
+      Ready
+    </div>
+
+  </div>
+
+  <div id="playlist"></div>
+
+</div>
+
+
+<script>
+
+const playlist = [
+
+  {
+    number: 32,
+
+    kural:
+      "அறத்தினூஉங்கு ஆக்கமும் இல்லை அதனை மறத்தலின் ஊங்கில்லை கேடு.",
+
+    meaning:
+      "அறத்தைச் செய்வதைவிடச் சிறந்த ஆக்கம் இல்லை; அதனை மறப்பதைவிடக் கேடு வேறு இல்லை."
+  },
+
+  {
+    number: 33,
+
+    kural:
+      "ஒல்லும் வகையான் அறவினை ஓவாதே செல்லும்வாய் எல்லாம் செயல்.",
+
+    meaning:
+      "தம்மால் இயன்ற அளவு, அறச்செயலை இடைவிடாது செய்ய வேண்டும்."
+  },
+
+  {
+    number: 87,
+
+    kural:
+      "அன்பும் அறனும் உடைத்தாயின் இல்வாழ்க்கை பண்பும் பயனும் அது.",
+
+    meaning:
+      "அன்பும் அறமும் உடையதாக இருக்கும் இல்வாழ்க்கையே நல்ல பண்பையும் பயனையும் உடையதாகும்."
+  },
+
+  {
+    number: 88,
+
+    kural:
+      "விருந்தோம்பி வேளாண்மை செய்தற்குப் பரிந்தோம்பிப் பண்பின் தலை.",
+
+    meaning:
+      "விருந்தினரைப் போற்றி வாழும் இல்வாழ்க்கை சிறந்த பண்புடையதாகும்."
+  },
+
+  {
+    number: 132,
+
+    kural:
+      "பரிந்து ஓம்பிக் காக்க ஒழுக்கம் தெரிந்து ஓம்பித் தேரினும் அஃதே துணை.",
+
+    meaning:
+      "ஒழுக்கத்தை நன்கு அறிந்து, அதைப் போற்றி காத்துக் கொள்ள வேண்டும்; வாழ்க்கையில் அதுவே துணையாகும்."
+  }
+
+];
+
+
+let currentIndex = 0;
+let playing = false;
+let voices = [];
+
+const playlistElement = document.getElementById("playlist");
+const voiceSelect = document.getElementById("voiceSelect");
+const speedSelect = document.getElementById("speedSelect");
+const nowPlaying = document.getElementById("nowPlaying");
+const statusElement = document.getElementById("status");
+const playAllButton = document.getElementById("playAllButton");
+
+
+function renderPlaylist() {
+
+  playlistElement.innerHTML = "";
+
+  playlist.forEach((item, index) => {
+
+    const div = document.createElement("div");
+
+    div.className = "kural";
+
+    if (index === currentIndex) {
+      div.classList.add("active");
+    }
+
+    div.innerHTML = `
+      <div class="kural-number">
+        குறள் ${item.number}
+      </div>
+
+      <div class="kural-text">
+        ${item.kural}
+      </div>
+
+      <div class="meaning-title">
+        பொருள்
+      </div>
+
+      <div class="meaning">
+        ${item.meaning}
+      </div>
+    `;
+
+    div.onclick = () => {
+
+      currentIndex = index;
+
+      renderPlaylist();
+
+      speakCurrent();
+
+    };
+
+    playlistElement.appendChild(div);
+
+  });
+
+}
+
+
+function loadVoices() {
+
+  voices = speechSynthesis.getVoices();
+
+  voiceSelect.innerHTML = "";
+
+  const tamilVoices = voices.filter(
+    voice => voice.lang.toLowerCase().startsWith("ta")
+  );
+
+  const availableVoices =
+    tamilVoices.length > 0 ? tamilVoices : voices;
+
+  availableVoices.forEach((voice, index) => {
+
+    const option = document.createElement("option");
+
+    option.value = voices.indexOf(voice);
+
+    option.textContent =
+      `${voice.name} (${voice.lang})`;
+
+    voiceSelect.appendChild(option);
+
+  });
+
+}
+
+
+speechSynthesis.onvoiceschanged = loadVoices;
+
+loadVoices();
+
+
+function getSelectedVoice() {
+
+  const index = parseInt(voiceSelect.value);
+
+  return voices[index] || null;
+
+}
+
+
+function speak(text, onEnd = null) {
+
+  speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+
+  const voice = getSelectedVoice();
+
+  if (voice) {
+    utterance.voice = voice;
+  }
+
+  utterance.lang = "ta-IN";
+
+  utterance.rate =
+    parseFloat(speedSelect.value);
+
+  utterance.pitch = 1;
+
+  utterance.onstart = () => {
+    statusElement.textContent = "🔊 Playing...";
+  };
+
+  utterance.onend = () => {
+
+    statusElement.textContent = "Finished";
+
+    if (onEnd) {
+      onEnd();
+    }
+
+  };
+
+  utterance.onerror = () => {
+    statusElement.textContent =
+      "Audio could not be played.";
+  };
+
+  speechSynthesis.speak(utterance);
+
+}
+
+
+function speakCurrent() {
+
+  const item = playlist[currentIndex];
+
+  nowPlaying.textContent =
+    `குறள் ${item.number}`;
+
+  renderPlaylist();
+
+  playing = true;
+
+  playAllButton.textContent =
+    "⏸ Pause Playlist";
+
+  const fullText =
+    `குறள் ${item.number}. ${item.kural}. பொருள். ${item.meaning}`;
+
+  speak(fullText, () => {
+
+    if (playing) {
+
+      nextKural();
+
+      if (playing) {
+        setTimeout(() => {
+          speakCurrent();
+        }, 500);
+      }
+
+    }
+
+  });
+
+}
+
+
+function togglePlayAll() {
+
+  if (!playing) {
+
+    playing = true;
+
+    speakCurrent();
+
+  } else {
+
+    playing = false;
+
+    speechSynthesis.pause();
+
+    playAllButton.textContent =
+      "▶️ Play All";
+
+    statusElement.textContent =
+      "Paused";
+
+  }
+
+}
+
+
+function toggleCurrent() {
+
+  if (speechSynthesis.speaking && !speechSynthesis.paused) {
+
+    speechSynthesis.pause();
+
+    playing = false;
+
+    statusElement.textContent =
+      "Paused";
+
+    playAllButton.textContent =
+      "▶️ Play All";
+
+    return;
+  }
+
+
+  if (speechSynthesis.paused) {
+
+    speechSynthesis.resume();
+
+    playing = true;
+
+    statusElement.textContent =
+      "🔊 Playing...";
+
+    playAllButton.textContent =
+      "⏸ Pause Playlist";
+
+    return;
+  }
+
+
+  speakCurrent();
+
+}
+
+
+function stopSpeech() {
+
+  playing = false;
+
+  speechSynthesis.cancel();
+
+  nowPlaying.textContent =
+    "எதுவும் இயக்கப்படவில்லை";
+
+  statusElement.textContent =
+    "Stopped";
+
+  playAllButton.textContent =
+    "▶️ Play All";
+
+}
+
+
+function nextKural() {
+
+  if (currentIndex < playlist.length - 1) {
+
+    currentIndex++;
+
+    renderPlaylist();
+
+  } else {
+
+    playing = false;
+
+    playAllButton.textContent =
+      "▶️ Play All";
+
+    statusElement.textContent =
+      "Playlist finished 🎉";
+
+    nowPlaying.textContent =
+      "Playlist முடிந்தது";
+
+  }
+
+}
+
+
+function previousKural() {
+
+  if (currentIndex > 0) {
+
+    currentIndex--;
+
+    renderPlaylist();
+
+    speakCurrent();
+
+  }
+
+}
+
+
+renderPlaylist();
+
+</script>
+
+</body>
+</html>
